@@ -42,15 +42,44 @@ const puppeteer = require("puppeteer");
   await new Promise((r) => setTimeout(r, 500));
 
   // 获取企业名称数组
-  let name;
-  await page.waitForSelector(".x-grid3-cell-inner"); // ElementHandle
-  const company = await page.$("#ext-gen36 > .x-grid3-td-3");
-  await page.evaluate((e) => {
-    const nameList = Array.from(e.childNodes);
-    nameList.map((v) => {
-      console.log(v.childNodes[0].innerText);
+  let name = [];
+  const getCompanyName = async () => {
+    await new Promise((r) => setTimeout(r, 500));
+    await page.waitForSelector(".x-grid3-cell-inner");
+    const nameList = await page.evaluate(() => {
+      const tds = Array.from(
+        document.querySelectorAll(
+          "#ext-gen36 .x-grid3-td-3 .x-grid3-cell-inner"
+        )
+      );
+      return tds.map((td) => td.innerText);
     });
-  }, company);
+    name.push(nameList);
+    const nextPageButton = await page.$("#ext-gen62");
+    let currentPage = await page.evaluate(() => {
+      const current = document.querySelector("#ext-comp-1016");
+      return current.value;
+    });
+    let totalPage = await page.evaluate(() => {
+      const total = document.querySelector("#ext-comp-1017");
+      return total.innerText;
+    });
+    if (totalPage.substring(4, 5) == " ") {
+      totalPage = totalPage.substring(3, 4);
+    } else {
+      totalPage = totalPage.substring(3, 5);
+    }
+    if (currentPage != totalPage) {
+      await nextPageButton.click();
+      await new Promise((r) => setTimeout(r, 500));
+      await getCompanyName();
+    }
+  };
+
+  await getCompanyName();
+
+  console.log(name);
+  console.log(name.length);
 
   // 关闭浏览器
   //   await browser.close();
