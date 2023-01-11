@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const getCompanyList = require("./getCompanyList.js");
 const getCompanyInfo = require("./getCompanyInfo.js");
+const { exportXlsx } = require("./utils.js");
 
 // 初始化
 (async () => {
@@ -20,9 +21,12 @@ const getCompanyInfo = require("./getCompanyInfo.js");
   // 新建窗口
   const infoPage = await browser.newPage();
 
-  // 获取企业信息并导出Excel
-  await getCompanyInfo(browser, infoPage, companyList);
+  // 获取企业资料
+  const companyInfo = await getCompanyInfo(browser, infoPage, companyList);
+
+  // 导出 Excel
+  await exportXlsx(companyInfo, "人力资源许可企业-从化区", "./data");
 
   // 关闭浏览器
-  // await browser.close();
+  await browser.close();
 })();

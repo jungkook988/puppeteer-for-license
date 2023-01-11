@@ -1,20 +1,26 @@
+const login = require("./login.js");
 const { pageDelay } = require("./utils.js");
 
 module.exports = getCompanyInfo = async (browser, page, list) => {
   const result = [];
 
   // 访问天眼查地址
-  await page.goto("https://www.tianyancha.com/company");
+  await page.goto("https://www.tianyancha.com");
+
+  // 检测是否登陆
+  await login(page);
 
   // 循环遍历查询
-  list.map(async (name) => {
-    console.log(name);
-    // 输入企业名称
-    await page.type("#header-company-search", name, {
-      delay: 0,
-    });
+  for (let name of list) {
+    // 输入企业名称并点击跳转
+    const searchTopInput = await page.waitForSelector("#header-company-search");
+    await searchTopInput.evaluate((el, text) => (el.value = text), name);
 
-    await pageDelay(500);
+    await pageDelay(800);
+
+    await searchTopInput.click();
+
+    await pageDelay(1500);
 
     const company = await page.waitForSelector("#suggest_eventId_0");
 
@@ -44,10 +50,33 @@ module.exports = getCompanyInfo = async (browser, page, list) => {
       return e.indexOf("人力资源服务") == 0;
     });
 
-    if (isHave) result.push(name);
+    // 判断是否拥有人力资源服务许可证
+    if (isHave) {
+      // 获取法人姓名
+      const singleName = await newPage.evaluate(() => {
+        const singleNameText = document.querySelector(".detailValue > a");
+        if (singleNameText) return singleNameText.innerText;
+      });
+      // 获取联系电话
+      const singlePhone = await newPage.evaluate(() => {
+        const singlePhoneText = document.querySelector(
+          ".index_detail-tel__fgpsE"
+        );
+        if (singlePhoneText) return singlePhoneText.innerText;
+      });
+      // 获取办公地址
+      const singleAddress = await newPage.evaluate(() => {
+        const singleAddressText = document.querySelector(
+          ".index_detail-address__ZmaTI"
+        );
+        if (singleAddressText) return singleAddressText.innerText;
+      });
+      // 添加数据
+      result.push([name, singleName, singlePhone, singleAddress]);
+    }
 
     await newPage.close();
-  });
+  }
 
-  console.log(result);
+  return result;
 };

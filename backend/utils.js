@@ -2,12 +2,26 @@ const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
 
-// 延时工具函数
+/**
+ *
+ * 延时工具函数
+ *
+ * @param second<number>
+ * @return Promise<SetTimeout>
+ *
+ */
 const pageDelay = (second) => {
   return new Promise((r) => setTimeout(r, second));
 };
 
-// 动态创建文件夹工具函数
+/**
+ *
+ * 动态创建文件夹工具函数
+ *
+ * @param pathname<string>
+ * @return File
+ *
+ */
 const createFolder = (pathname, callback) => {
   // 判断是否为绝对路径
   pathname = path.isAbsolute(pathname)
@@ -45,14 +59,26 @@ const createFolder = (pathname, callback) => {
   });
 };
 
-// 导出Excel工具函数
+/**
+ *
+ * 导出Excel工具函数
+ *
+ * @param data<unknown[string[], ...]>
+ * @param filename<string>
+ * @param path<string>
+ * @return Promise<File>
+ *
+ */
 const exportXlsx = (data, filename, path) => {
-  let aoaList = [["公司名称"], data]; // 添加表头
-  const workbook = xlsx.utils.book_new();
-  const worksheet = xlsx.utils.aoa_to_sheet(aoaList);
-  xlsx.utils.book_append_sheet(workbook, worksheet, filename);
-  createFolder(path);
-  xlsx.writeFile(workbook, `${path}/${filename}.xlsx`);
+  return new Promise((resolve) => {
+    let aoaList = [["公司名称", "法人", "电话", "地址"], ...data]; // 添加表头
+    const workbook = xlsx.utils.book_new();
+    const worksheet = xlsx.utils.aoa_to_sheet(aoaList);
+    xlsx.utils.book_append_sheet(workbook, worksheet, filename);
+    createFolder(path);
+    xlsx.writeFile(workbook, `${path}/${filename}.xlsx`);
+    resolve();
+  });
 };
 
 module.exports = {

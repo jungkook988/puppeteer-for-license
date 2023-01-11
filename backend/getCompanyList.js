@@ -6,14 +6,23 @@ module.exports = getCompanyList = async (page) => {
     "https://ggfw.hrss.gd.gov.cn/rlzyh/radowAction.do?method=doEvent&pageModel=pages.homepage.LoginFirstAll"
   );
 
+  await page.waitForSelector("#bba901_combo");
   // 选择市级选项（广州市）
   await page.focus("#bba901_combo");
   await page.keyboard.press("ArrowDown");
   await pageDelay(500);
   await page.keyboard.press("Enter");
 
-  // 选择区级选项（天河区）
+  await pageDelay(500);
+
+  // 选择区级选项
   await page.focus("#bba900_combo");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
